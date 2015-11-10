@@ -39,7 +39,7 @@ exports.debug = function(req, res) {
 
 exports.lastUpdate = function(req, res) {
 	var oneHourAgo = Date.now() - 3600000;
-    db.collection('datapoints', function(err, collection) {
+        db.collection('datapoints', function(err, collection) {
         collection.find({
 			timestamp: {
 				$gte: oneHourAgo
@@ -102,6 +102,7 @@ exports.valuesPerDevicePerKeyInRange = function(req, res) {
 exports.addDatapoint = function(req, res) {
     var datapoint = req.body;
 	datapoint.device_id = req.params.device_id;
+	datapoint.timestamp = Date.now();
     console.log('Adding datapoint: ' + JSON.stringify(datapoint));
     db.collection('datapoints', function(err, collection) {
         collection.insert(datapoint, {safe:true}, function(err, result) {

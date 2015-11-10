@@ -11,6 +11,7 @@ app.configure(function () {
 });
 
 app.get('/rest/system/temperature', systemService.temperature);
+app.get('/rest/system/mem', systemService.memAvailable);
 
 app.get('/rest/debug', dataLogService.debug);
 app.get('/rest/lastUpdate', dataLogService.lastUpdate);
@@ -24,5 +25,5 @@ app.post('/rest/:device_id', dataLogService.addDatapoint);
 app.delete('/rest/:device_id', dataLogService.deleteDevice);
 app.delete('/rest/:device_id/:id', dataLogService.deleteDatapoint);
 
-app.listen(3000);
-console.log('Listening on port 3000...');
+app.listen(80);
+console.log('Listening on port 80...');

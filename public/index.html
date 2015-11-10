@@ -6,8 +6,8 @@
 <title>Datalog</title>
 <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
 <link rel="stylesheet" href="bower_components/angular-rangeslider/angular.rangeSlider.css">
-<link rel="stylesheet" href="effects.css">
-<link rel="stylesheet" href="customStyle.css">
+<link rel="stylesheet" href="css/effects.css">
+<link rel="stylesheet" href="css/customStyle.css">
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
@@ -43,9 +43,9 @@
 								<li><a href="#/showManualInput/">Debugeingabe</a></li>
 							</ul></li>
 					</ul>
-					<ul class="nav navbar-nav navbar-right">
-						<p calss="{{updateTempCSS}}">{{serverTemp}}</p>
-					</ul>
+					<p class="nav navbar-nav navbar-right">
+						CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}}
+					</p>
 				</div>
 				<!-- /.navbar-collapse -->
 			</div>

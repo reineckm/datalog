@@ -330,13 +330,13 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
 	    $scope.infoBoxShow = false;
 	}
     });
+
     $scope.$on('infoBox', function(event, args) {
 	$scope.infoBoxText = args.text;
 	$scope.infoBoxShow = true;
 	$scope.infoBoxFrom = args.from;
     });
 
-    $scope.serverTemp = "--";
     var getUpdates = function() {
 	var updateServiceUrl = "lastUpdate";
 	rest.queryURL(updateServiceUrl).then(function(promise) {
@@ -348,12 +348,13 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
 	
 	var tempServiceUrl = "system/temperature";
 	rest.queryURL(tempServiceUrl).then(function(promise) {
-	    $scope.serverTemp = promise.data;
-	    $scope.updateTempCSS = "glow";
-	    console.log($scope.serverTemp);
-	    $timeout(function() {$scope.updateTempCSS = "";}, 1500);
+	    $scope.serverTemp = parseInt(promise.data.cpuTemp) / 1000;
 	});
 	
+        var memServiceUrl = "system/mem";
+        rest.queryURL(memServiceUrl).then(function(promise) {
+            $scope.serverMemAvail = promise.data.memAvailable;
+        });
     };
     $interval(getUpdates, 30000);
     getUpdates();
