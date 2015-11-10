@@ -1,0 +1,30 @@
+@-webkit-keyframes glowing {
+  0% { -webkit-box-shadow: 0 0 3px #004A7F; }
+  50% { -webkit-box-shadow: 0 0 10px #0094FF; }
+  100% { -webkit-box-shadow: 0 0 0px #FFFFFF; }
+}
+
+@-moz-keyframes glowing {
+  0% { -moz-box-shadow: 0 0 3px #004A7F; }
+  50% { -moz-box-shadow: 0 0 10px #0094FF; }
+  100% { -moz-box-shadow: 0 0 0px #FFFFFF; }
+}
+
+@-o-keyframes glowing {
+  0% { box-shadow: 0 0 3px #004A7F; }
+  50% { box-shadow: 0 0 10px #0094FF; }
+  100% { box-shadow: 0 0 0px #FFFFFF; }
+}
+
+@keyframes glowing {
+  0% { box-shadow: 0 0 3px #004A7F; }
+  50% { box-shadow: 0 0 10px #0094FF; }
+  100% { box-shadow: 0 0 0px #FFFFFF; }
+}
+
+.glow {
+  -webkit-animation: glowing 1500ms;
+  -moz-animation: glowing 1500ms;
+  -o-animation: glowing 1500ms;
+  animation: glowing 1500ms;
+}

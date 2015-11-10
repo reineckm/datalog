@@ -1,0 +1,16 @@
+<meta charset="utf-8">
+<input ng-model="searchText" placeholder="Filter">
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th ng-repeat="head in header">{{head}}</th>
+			<th>Löschen</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="row in rows.rows | filter:searchText">
+			<td ng-repeat="column in rows.cols">{{row[column]}}</td>
+			<td><a href="#/showDelete/{{row.device_id}}/{{row._id}}">X</a></td>
+		</tr>
+	</tbody>
+</table>

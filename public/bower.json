@@ -1,0 +1,6 @@
+{
+  "name": "DataLog",
+  "dependencies": {
+    "angular-google-chart": "~0.0.11"
+  }
+}

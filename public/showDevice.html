@@ -1,0 +1,38 @@
+<meta charset="utf-8">
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th>Gerät: {{deviceId}}</th>
+		</tr>
+	</thead>
+</table>
+<form>
+	<div range-slider min="sliderMin" max="sliderMax" model-min="min" model-max="max" filter="date" filter-options="short"
+		on-handle-up="reload()"></div>
+	<label ng-repeat="key in keys"> <input type="radio" ng-model="selectedKey.name" value="{{key}}"
+		ng-change="reload()">{{key}}
+	</label>
+	<div ng-show="showChart">
+		<div google-chart chart="chartObject" style=""></div>
+	</div>
+	<div ng-show="showMap">
+		<center>
+			<img ng-src="{{mapLink}}">
+		</center>
+	</div>
+	</div>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th>Zeitpunkt</th>
+				<th>Wert</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="set in data|orderBy:TIMESTAMP:ASC">
+				<td>{{set.timestamp | date:'dd.MM.yy HH:mm'}}</td>
+				<td>{{set.value}}</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
