@@ -7,7 +7,7 @@ var app = express();
 app.configure(function () {
     app.use(express.logger('dev'));
     app.use(express.bodyParser());
-	app.use(express.static('public'));
+    app.use(express.static(__dirname + '/public'));
 });
 
 app.get('/rest/system/temperature', systemService.temperature);
@@ -25,5 +25,5 @@ app.post('/rest/:device_id', dataLogService.addDatapoint);
 app.delete('/rest/:device_id', dataLogService.deleteDevice);
 app.delete('/rest/:device_id/:id', dataLogService.deleteDatapoint);
 
-app.listen(80);
-console.log('Listening on port 80...');
+app.listen(3000);
+console.log('Listening on port 3000...');
