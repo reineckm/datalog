@@ -143,7 +143,7 @@ exports.deleteDevice = function(req, res) {
                 res.send({'error':'An error has occurred - ' + err});
             } else {
                 console.log('' + result + ' document(s) deleted');
-                res.send(req.body);
+                res.send(result.n);
             }
         });
     });
@@ -162,7 +162,7 @@ exports.deleteDatapoint = function(req, res) {
                 res.send(result);
             }
         });
-    });    
+    });
 }
 
 var populateDB = function() {
