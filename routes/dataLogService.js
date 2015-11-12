@@ -118,17 +118,17 @@ exports.addDatapoint = function(req, res) {
 
 exports.updateDatapoint = function(req, res) {
     var id = req.params.id;
-    var wine = req.body;
+    var point = req.body;
     console.log('Updating datapoint: ' + id);
     console.log(JSON.stringify(wine));
     db.collection('datapoints', function(err, collection) {
-        collection.deleteOne({'_id':new BSON.ObjectID(id)}, wine, {safe:true}, function(err, result) {
+        collection.deleteOne({'_id':new BSON.ObjectID(id)}, point, {safe:true}, function(err, result) {
             if (err) {
                 console.log('Error updating datapoint: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
                 console.log('' + result + ' document(s) updated');
-                res.send(wine);
+                res.send(point);
             }
         });
     });
@@ -143,7 +143,7 @@ exports.deleteDevice = function(req, res) {
                 res.send({'error':'An error has occurred - ' + err});
             } else {
                 console.log('' + result + ' document(s) deleted');
-                res.send(result.n);
+                res.send(result);
             }
         });
     });
