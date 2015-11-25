@@ -199,7 +199,7 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
           }
         },
         "hAxis" : {
-          "title" : "Date"
+          "title" : "Zeit"
         }
       },
       "formatters" : {}

@@ -70,7 +70,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="update in updates">
-							<td>{{update.timestamp | date:'short':DE}}</td>
+							<td>{{update.timestamp | date:'dd.MM.yy HH:mm'}}</td>
 							<td>{{update.device_id}}</td>
 							<td>{{update.key}}</td>
 							<td>{{update.value}}</td>
