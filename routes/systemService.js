@@ -12,7 +12,6 @@ exports.temperature = function(req, res) {
   }
 };
 
-
 exports.memAvailable = function(req, res) {
   if (os.type() === "Linux") {
     exec("cat /proc/meminfo | grep MemAvailable", function (error, stdout, stderr) {
@@ -20,6 +19,16 @@ exports.memAvailable = function(req, res) {
     });
   } else {
     res.send({memAvailable:0});
+  }
+};
+
+exports.uptime = function(req, res) {
+  if (os.type() === "Linux") {
+    exec("uptime -p", function (error, stdout, stderr) {
+      res.send({uptime:stdout});
+    });
+  } else {
+    res.send({uptime:0});
   }
 };
 

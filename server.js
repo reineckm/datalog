@@ -12,6 +12,7 @@ app.configure(function () {
 
 app.get('/rest/system/temperature', systemService.temperature);
 app.get('/rest/system/mem', systemService.memAvailable);
+app.get('/rest/system/uptime', systemService.uptime);
 
 app.get('/rest/debug', dataLogService.debug);
 app.get('/rest/lastUpdate', dataLogService.lastUpdate);

@@ -303,7 +303,7 @@ app.controller('showManualInput', function(rest, $scope, $routeParams) {
     $scope.devices = rest.postURL(serviceUrl, data).then(function(promise) {
       console.log(promise.data);
       $scope.$emit('infoBox', {
-        text : promise.data + " Datensätze eingefügt.",
+        text : promise.data.length() + " Datensätze eingefügt.",
       });
     });
   };
@@ -358,7 +358,6 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
     var updateServiceUrl = "lastUpdate";
     rest.getURL(updateServiceUrl).then(function(promise) {
       $scope.updates = promise.data;
-      console.dir(promise.data);
       $scope.updateTableCSS = "glow";
       $timeout(function() {$scope.updateTableCSS = "";}, 1500);
     });
@@ -371,6 +370,11 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
     var memServiceUrl = "system/mem";
     rest.getURL(memServiceUrl).then(function(promise) {
       $scope.serverMemAvail = promise.data.memAvailable;
+    });
+
+    var uptimeUrl = "system/uptime";
+    rest.getURL(uptimeUrl).then(function(promise) {
+      $scope.serverUptime = promise.data.uptime;
     });
   };
   $interval(getUpdates, 30000);
