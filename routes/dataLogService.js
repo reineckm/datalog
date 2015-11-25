@@ -100,6 +100,8 @@ exports.valuesPerDevicePerKeyInRange = function(req, res) {
 };
 
 exports.addDatapoint = function(req, res) {
+  console.log(req);
+  console.log(req.body);
     var datapoint = req.body;
 	datapoint.device_id = req.params.device_id;
 	datapoint.timestamp = Date.now();
