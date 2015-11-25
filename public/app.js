@@ -2,6 +2,26 @@
 
 var app = angular.module('IndexApp', [ 'ngRoute', 'ui-rangeSlider', 'googlechart' ]);
 
+app.filter('dateFormat', function($filter) {
+  return function(input) {
+    if(input == null){ return ""; }
+    var _date = $filter('date')(new Date(input), 'dd.MM.yy HH:MM');
+    return _date.toString();
+  };
+});
+
+app.factory('dateUtil', function() {
+  var util = {
+    germanDateTime : function(date) {
+      return date.getDate() + "." + date.getMonth() + "." + date.getYear() + " " + date.getHours() + ":" + date.getMinutes();
+    },
+    germanDate : function(date) {
+      return date.getDate() + "." + date.getMonth() + "." + date.getYear();
+    }
+  };
+  return util;
+});
+
 app.factory('rest', function($http) {
   var arrayToQuerystring = function(params) {
     if (params) {
@@ -63,7 +83,7 @@ app.controller('showDebug', function(rest, $scope, $routeParams) {
   });
 });
 
-app.controller('showDevice', function(rest, $scope, $routeParams, $q) {
+app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) {
   $scope.deviceId = $routeParams.id;
   $scope.data = [];
   $scope.mapLink = "white.png";
@@ -144,10 +164,10 @@ app.controller('showDevice', function(rest, $scope, $routeParams, $q) {
       $scope.gcRows.push({
         "c" : [ {
           "v" : new Date($scope.data[i].timestamp),
-          "f" : Date($scope.data[i].timestamp)
+          "f" : dateUtil.germanDateTime(new Date($scope.data[i].timestamp))
         }, {
           "v" : $scope.data[i].value,
-          "f" : ""
+          "f" : $scope.data[i].value
         } ],
       });
     }
@@ -263,9 +283,8 @@ app.controller('showDevice', function(rest, $scope, $routeParams, $q) {
     }
   };
 
-  // We load the data first when the whole range and all the
-  // keys are
-  // known
+  // We load the data only when the whole range and all the
+  // keys are known
   $q.all([ rangePromise, keyPromise ]).then(function(result) {
     $scope.reload();
   }, function() {
