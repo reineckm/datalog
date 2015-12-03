@@ -14,6 +14,23 @@ app.filter('dateFormat', function($filter) {
   };
 });
 
+app.filter('minutesAgo', function () {
+  return function (input) {
+    input = (Date.now() - input) / 1000;
+    function z(n) { return (n < 10 ? '0' : '') + n; }
+    var seconds = Math.floor(input % 60);
+    var minutes = Math.floor(input % 3600 / 60);
+    var hours = Math.floor(input / 3600);
+    if (hours < 1 && minutes < 2) {
+      return "aktuell";
+    } else if (hours < 1) {
+      return "vor " + minutes + " Minuten";
+    } else {
+      return hours + ':' + z(minutes) + ' her';
+    }
+  };
+});
+
 app.directive('serverStats', function() {
   return {
     template: 'Uptime: {{serverUptime}} | CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}}'
@@ -23,7 +40,7 @@ app.directive('serverStats', function() {
 app.directive('widgets', function(rest) {
   return {
     template: '<ul ng-repeat="temp in widgetDegC">' +
-    '<li>{{temp._id.device_id}}, {{temp._id.key}}, {{temp.lastDate | date:"dd.MM.yy HH:mm"}}: {{temp.value}}</li>' +
+    '<li><b>{{temp.value}} °C</b> bei {{temp._id.device_id}} {{temp._id.key}} ({{temp.lastDate | minutesAgo}})</li>' +
     '</ul>'
   };
 });
