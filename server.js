@@ -20,6 +20,7 @@ app.get('/rest/deviceids', dataLogService.deviceids);
 app.get('/rest/:device_id/keys', dataLogService.keys);
 app.get('/rest/:device_id/range', dataLogService.range);
 app.get('/rest/:device_id/:key/:from/:to', dataLogService.valuesPerDevicePerKeyInRange);
+app.get('/rest/newestKeysEndingWith/:token', dataLogService.newestKeysEndingWith);
 
 app.post('/rest/:device_id', dataLogService.addDatapoint);
 

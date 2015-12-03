@@ -14,11 +14,12 @@
 <script src="bower_components/angular-rangeslider/angular.rangeSlider.js"></script>
 <script src="bower_components/angular-route/angular-route.js"></script>
 <script src="bower_components/angular-google-chart/ng-google-chart.js"></script>
+<script src="datalogLibrary.js"></script>
 <script src="app.js"></script>
 </head>
 <body ng-controller="MainCtrl">
 	<p></p>
-	<div class="container-fluid">
+	<main class="container" style="height: 100vh;">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
@@ -38,6 +39,7 @@
 							aria-haspopup="true" aria-expanded="false">Geräte<span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<li><a href="#/showDevices/">Zeige Geräte</a></li>
+                            	<li><a href="#/showUpdates/">Zeige letzte Änderungen</a></li>
                             </ul>
                         </li>
                         <li class="dropdown"><a href="" class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -49,9 +51,6 @@
                             </ul>
                         </li>
 					</ul>
-					<p class="nav navbar-nav navbar-right">
-						Uptime: {{serverUptime}} | CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}}
-					</p>
 				</div>
 				<!-- /.navbar-collapse -->
 			</div>
@@ -64,30 +63,16 @@
 					{{infoBoxText}}
 				</div>
 			</div>
-			<div class=".col-xs-12 col-md-4">
-				<table class="table table-hover {{updateTableCSS}}">
-					<thead>
-						<tr>
-							<th>Zeit</th>
-							<th>Gerät</th>
-							<th>Feld</th>
-							<th>Wert</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="update in updates">
-							<td>{{update.timestamp | date:'dd.MM.yy HH:mm'}}</td>
-							<td>{{update.device_id}}</td>
-							<td>{{update.key}}</td>
-							<td>{{update.value}}</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			<div widgets class=".col-xs-12 col-md-4"></div>
 			<div class="col-xs-12 col-md-8">
 				<div ng-view></div>
 			</div>
 		</div>
-	</div>
+    </main>
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container">
+            <div server-stats class="navbar-text pull-left"></div>
+        </div>
+    </div>
 </body>
 </html>

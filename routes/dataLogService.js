@@ -99,10 +99,35 @@ exports.valuesPerDevicePerKeyInRange = function(req, res) {
 	});
 };
 
+exports.newestKeysEndingWith = function(req, res) {
+  var query = {
+    key: {$regex : ".*" + req.params.token},
+    timestamp: {
+      $gte: parseInt(req.params.from),
+      $lte: parseInt(req.params.to)
+    }
+  }
+  db.collection('datapoints', function(err, collection) {
+    collection.aggregate([
+      {$match: {
+        key: {$regex : ".*" + req.params.token}
+      }},
+      {$sort: { device_id: 1, key: 1, timestamp: -1 }},
+      {$group: {
+        _id: {device_id: "$device_id", key: "$key"},
+        lastDate: { $first: "$timestamp" },
+        value : { $first: '$value' }
+      }}
+    ]
+                        ).toArray(function(err, items) {
+      console.log(err);
+      res.send(items);
+    })
+  });
+};
+
 exports.addDatapoint = function(req, res) {
-  console.log(req);
-  console.log(req.body);
-    var datapoint = req.body;
+  var datapoint = req.body;
 	datapoint.device_id = req.params.device_id;
 	datapoint.timestamp = Date.now();
     console.log('Adding datapoint: ' + JSON.stringify(datapoint));

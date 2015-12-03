@@ -2,6 +2,10 @@
 
 var app = angular.module('IndexApp', [ 'ngRoute', 'ui-rangeSlider', 'googlechart' ]);
 
+app.factory('dateUtil', lib.DateUtil);
+
+app.factory('rest', lib.RestHelper);
+
 app.filter('dateFormat', function($filter) {
   return function(input) {
     if(input == null){ return ""; }
@@ -10,51 +14,18 @@ app.filter('dateFormat', function($filter) {
   };
 });
 
-app.factory('dateUtil', function() {
-  var util = {
-    germanDateTime : function(date) {
-      return date.getDate() + "." + date.getMonth() + "." + date.getYear() + " " + date.getHours() + ":" + date.getMinutes();
-    },
-    germanDate : function(date) {
-      return date.getDate() + "." + date.getMonth() + "." + date.getYear();
-    }
+app.directive('serverStats', function() {
+  return {
+    template: 'Uptime: {{serverUptime}} | CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}}'
   };
-  return util;
 });
 
-app.factory('rest', function($http) {
-  var arrayToQuerystring = function(params) {
-    if (params) {
-      var qs = "?";
-      for (var i = 0; i < params.length; i++) {
-        qs += params[i].key + "=" + params[i].value + "&";
-      }
-      return qs;
-    }
-    return "";
+app.directive('widgets', function(rest) {
+  return {
+    template: '<ul ng-repeat="temp in widgetDegC">' +
+    '<li>{{temp._id.device_id}}, {{temp._id.key}}, {{temp.lastDate | date:"dd.MM.yy HH:mm"}}: {{temp.value}}</li>' +
+    '</ul>'
   };
-  var baseUrl = document.location.origin + window.location.pathname + "rest/";
-  var rest = {
-    getURL : function(url, params) {
-      var targeturl = baseUrl + url + arrayToQuerystring(params);
-      return $http.get(targeturl);
-    },
-    getURLWithIndex : function(url, params, i) {
-      var targeturl = baseUrl + url + arrayToQuerystring(params);
-      var config = [];
-      config.index = i;
-      return $http.get(targeturl, config);
-    },
-    postURL : function(url, data) {
-      var targeturl = baseUrl + url;
-      return $http.post(targeturl, data);
-    },
-    deleteURL : function(url) {
-      var targeturl = baseUrl + url;
-      return $http.delete(targeturl);
-    }
-  };
-  return rest;
 });
 
 app.controller('showDevices', function(rest, $scope, $routeParams) {
@@ -376,6 +347,11 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
     rest.getURL(uptimeUrl).then(function(promise) {
       $scope.serverUptime = promise.data.uptime;
     });
+
+    var degCuRL = "newestKeysEndingWith/degC";
+    rest.getURL(degCuRL).then(function(promise) {
+      $scope.widgetDegC = promise.data;
+    });
   };
   $interval(getUpdates, 30000);
   getUpdates();
@@ -385,6 +361,8 @@ app.config(function($routeProvider, $locationProvider) {
   $routeProvider.when('/showDevices', {
     templateUrl : 'showDevices.html',
     controller : 'showDevices'
+  }).when('/showUpdates', {
+    templateUrl : 'showUpdates.html',
   }).when('/showDevice/:id', {
     templateUrl : 'showDevice.html',
     controller : 'showDevice'
