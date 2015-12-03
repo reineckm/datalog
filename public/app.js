@@ -39,9 +39,10 @@ app.directive('serverStats', function() {
 
 app.directive('widgets', function(rest) {
   return {
-    template: '<ul ng-repeat="temp in widgetDegC">' +
-    '<li><b>{{temp.value}} °C</b> bei {{temp._id.device_id}} {{temp._id.key}} ({{temp.lastDate | minutesAgo}})</li>' +
-    '</ul>'
+    template:
+    '<div ng-repeat="a in lastByType">' +
+    '  <b>{{a.value}} {{a.unit}}</b> bei {{a.device_id}} {{a.key}} ({{a.timestamp | minutesAgo}})' +
+    '</div>'
   };
 });
 
@@ -289,9 +290,8 @@ app.controller('showManualInput', function(rest, $scope, $routeParams) {
     };
     var serviceUrl = $scope.deviceId;
     $scope.devices = rest.postURL(serviceUrl, data).then(function(promise) {
-      console.log(promise.data);
       $scope.$emit('infoBox', {
-        text : promise.data.length() + " Datensätze eingefügt.",
+        text : "Datensatz " + promise.data + "eingefügt."
       });
     });
   };
@@ -321,6 +321,17 @@ app.controller('showDeleteDevice', function(rest, $scope, $routeParams, $locatio
       $scope.$emit('infoBox', {
         text : "Gelöschte Einträge: " + promise.data.n,
         from : $location.absUrl()
+      });
+    });
+  };
+});
+
+app.controller('showAddDatatype', function(rest, $scope, $routeParams) {
+  $scope.send = function(datatype) {
+    $scope.devices = rest.postURL("datatypes", datatype).then(function(promise) {
+      console.log(promise.data);
+      $scope.$emit('infoBox', {
+        text : "Datensatz " + promise.data + "eingefügt."
       });
     });
   };
@@ -365,9 +376,33 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
       $scope.serverUptime = promise.data.uptime;
     });
 
-    var degCuRL = "newestKeysEndingWith/degC";
-    rest.getURL(degCuRL).then(function(promise) {
-      $scope.widgetDegC = promise.data;
+    rest.getURL("datatypes").then(function(typePromise) {
+      $scope.lastByType = $scope.lastByType || [];
+      for (var t = 0; t < typePromise.data.length; t++) {
+        var aType = typePromise.data[t]
+        var newest = "newestKeysEndingWith/_" + aType.sufix;
+        rest.getURLWithIndex(newest, null, aType).then(function(dataPromise) {
+          $scope.lastByType[dataPromise.config.index.name] = [];
+          for (var i = 0; i < dataPromise.data.length; i++) {
+            var aDataPoint = {};
+            aDataPoint.value = dataPromise.data[i].value;
+            aDataPoint.unit =  dataPromise.config.index.unit;
+            aDataPoint.device_id = dataPromise.data[i]._id.device_id;
+            aDataPoint.key = dataPromise.data[i]._id.key.substring(0,dataPromise.data[i]._id.key.length - dataPromise.config.index.sufix.length - 1);
+            aDataPoint.timestamp = dataPromise.data[i].lastDate;
+            var found = false;
+            for (var f = 0; f < $scope.lastByType.length; f++) {
+              if (($scope.lastByType[f].device_id === aDataPoint.device_id) &&
+                  ($scope.lastByType[f].key === aDataPoint.key)) {
+                found = true;
+                $scope.lastByType[f] = aDataPoint;
+              }
+            }
+            if (!found) {
+              $scope.lastByType.push(aDataPoint);
+            }
+          }
+        })}
     });
   };
   $interval(getUpdates, 30000);
@@ -395,6 +430,9 @@ app.config(function($routeProvider, $locationProvider) {
   }).when('/showDeleteDevice/:device_id', {
     templateUrl : 'showDeleteDevice.html',
     controller : 'showDeleteDevice'
+  }).when('/showAddDatatype', {
+    templateUrl : 'showAddDatatype.html',
+    controller : 'showAddDatatype'
   }).otherwise({
     redirectTo : "/"
   });

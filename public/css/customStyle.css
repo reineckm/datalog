@@ -1,12 +1,1 @@
-body {
-  margin: 0;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  color: #333333;
-  background-image: linear-gradient(90deg, white, white, white, white, white, white, white, white, white, rgb(240,240,255));
-}
 
-.navbar {
-  background-color: #fffff5;
-  color: #000000
-}

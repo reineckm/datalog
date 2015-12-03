@@ -1,0 +1,9 @@
+<meta charset="utf-8">
+<form role="form">
+	<div class="form-group">
+		<label for="deviceId">Name:</label> <input id="deviceId" class="form-control" ng-model="type.name" />
+		<label for="key">Sufix:</label> <input id="key" class="form-control" ng-model="type.sufix" />
+		<label for="value">Einheit:</label> <input id="value" class="form-control" ng-model="type.unit" />
+	</div>
+	<button ng-click="send(type)" class="btn btn-default">Hinzufügen</button>
+</form>
