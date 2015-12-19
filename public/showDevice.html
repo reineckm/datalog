@@ -8,8 +8,18 @@
 </table>
 <form>
 	<label ng-repeat="key in keys"> <input type="radio" ng-model="selectedKey.name" value="{{key}}"
-		ng-change="reload()">{{key}}
+		ng-change="reload()" name="keyChoice">{{key}} |
+    </label> </br>
+    <label>
+       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="day" ng-change="reloadSlider()">heute |
 	</label>
+    <label>
+       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="week" ng-change="reloadSlider()">diese Woche |
+	</label>
+    <label>
+       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="all" ng-change="reloadSlider()">alle Werte
+	</label>
+
     <div range-slider min="sliderMin" max="sliderMax" model-min="min" model-max="max" filter="dateFormat"
 		on-handle-up="reload()"></div>
 	<div ng-show="showChart">

@@ -87,7 +87,7 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
   var rangePromise = rest.getURL(rangeURL).then(function(promise) {
     var min = parseInt(promise.data.MIN_TS);
     var max = parseInt(promise.data.MAX_TS);
-    $scope.min = $scope.sliderMin = min;
+    $scope.min = $scope.sliderMin = $scope.sliderAbsMin = min;
     $scope.max = $scope.sliderMax = max;
     var hoursAgo24 = max - 24 * 60 * 60 * 1000;
     if (min < hoursAgo24) {
@@ -116,6 +116,26 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
     }
   };
 
+  // Slider neu laden, wenn zwischen Tag Woche und allen Daten gwechselt wurde
+  $scope.reloadSlider = function() {
+    if (angular.isString($scope.dayWeekAll) && $scope.dayWeekAll.length > 0) {
+      var hoursAgo24 = new Date() - 24 * 60 * 60 * 1000;
+      var weekAgo = hoursAgo24 * 7;
+      if ($scope.dayWeekAll == "day") {
+        if ($scope.sliderAbsMin <= hoursAgo24 && $scope.sliderAbsMax > hoursAgo24) {
+          $scope.sliderMin = hoursAgo24;
+          $scope.min = hoursAgo24;
+        }
+      } else if ($scope.dayWeekAll == "week") {
+        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderAbsMax > hoursAgo24) {
+          $scope.sliderMin = weekAgo;
+          $scope.min = weekAgo;
+        }
+      } else if ($scope.dayWeekAll == "all") {
+        $scope.min = $scope.sliderMin = $scope.sliderAbsMin;
+      }
+    }
+  };
 
   // Here data which seems like it only has binary states (0,
   // 1) gets

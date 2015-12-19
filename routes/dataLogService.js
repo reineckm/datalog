@@ -73,11 +73,15 @@ exports.keys = function(req, res) {
 };
 
 exports.range = function(req, res) {
-    forId = req.params.device_id;
+  forId = req.params.device_id;
 	db.collection('datapoints', function(err, collection) {
 		collection.aggregate([
+      {$match: {
+        device_id: forId
+      }},
 			{ $group: { '_id':forId , 'MIN_TS': {'$min': "$timestamp" }, 'MAX_TS': {'$max': "$timestamp" } } }
 		]).toArray(function(err, items) {
+      console.log(items);
 			res.send(items[0]);
 		})
 	});

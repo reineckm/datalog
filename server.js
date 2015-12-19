@@ -1,7 +1,8 @@
 var express = require('express'),
     dataLogService = require('./routes/dataLogService'),
     datatypeService = require('./routes/datatypeService'),
-    systemService = require('./routes/systemService');
+    systemService = require('./routes/systemService'),
+    zeronerService = require('./routes/zeronerService');
 
 var app = express();
 
@@ -28,6 +29,8 @@ app.get('/rest/newestKeysEndingWith/:token', dataLogService.newestKeysEndingWith
 app.post('/rest/:device_id', dataLogService.addDatapoint);
 app.delete('/rest/:device_id', dataLogService.deleteDevice);
 app.delete('/rest/:device_id/:id', dataLogService.deleteDatapoint);
+
+app.get('/rest/pedometer/today', zeronerService.getPedoToday);
 
 app.listen(3000);
 console.log('Listening on port 3000...');
