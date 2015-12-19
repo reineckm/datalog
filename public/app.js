@@ -122,12 +122,12 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
       var hoursAgo24 = new Date() - 24 * 60 * 60 * 1000;
       var weekAgo = hoursAgo24 * 7;
       if ($scope.dayWeekAll == "day") {
-        if ($scope.sliderAbsMin <= hoursAgo24 && $scope.sliderAbsMax > hoursAgo24) {
+        if ($scope.sliderAbsMin <= hoursAgo24 && $scope.sliderMax > hoursAgo24) {
           $scope.sliderMin = hoursAgo24;
           $scope.min = hoursAgo24;
         }
       } else if ($scope.dayWeekAll == "week") {
-        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderAbsMax > hoursAgo24) {
+        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderMax > hoursAgo24) {
           $scope.sliderMin = weekAgo;
           $scope.min = weekAgo;
         }
