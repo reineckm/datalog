@@ -2,7 +2,7 @@ var express = require('express'),
     dataLogService = require('./routes/dataLogService'),
     datatypeService = require('./routes/datatypeService'),
     systemService = require('./routes/systemService'),
-    zeronerService = require('./routes/zeronerService');
+    displayService = require('./routes/displayService');
 
 var app = express();
 
@@ -26,11 +26,13 @@ app.get('/rest/:device_id/keys', dataLogService.keys);
 app.get('/rest/:device_id/range', dataLogService.range);
 app.get('/rest/:device_id/:key/:from/:to', dataLogService.valuesPerDevicePerKeyInRange);
 app.get('/rest/newestKeysEndingWith/:token', dataLogService.newestKeysEndingWith);
+app.get('/rest/newest/:device_id/:key/', dataLogService.newestPerDevicePerKey);
 app.post('/rest/:device_id', dataLogService.addDatapoint);
 app.delete('/rest/:device_id', dataLogService.deleteDevice);
 app.delete('/rest/:device_id/:id', dataLogService.deleteDatapoint);
 
-app.get('/rest/pedometer/today', zeronerService.getPedoToday);
+app.get('/rest/display', displayService.getDisplay);
+app.post('/rest/display/:line', displayService.setDisplay);
 
 app.listen(3000);
 console.log('Listening on port 3000...');

@@ -1,25 +1,15 @@
 <meta charset="utf-8">
-<table class="table table-hover">
-	<thead>
-		<tr>
-			<th>Gerät: {{deviceId}}</th>
-		</tr>
-	</thead>
-</table>
-<form>
-	<label ng-repeat="key in keys"> <input type="radio" ng-model="selectedKey.name" value="{{key}}"
-		ng-change="reload()" name="keyChoice">{{key}} |
-    </label> </br>
-    <label>
-       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="day" ng-change="reloadSlider()">heute |
-	</label>
-    <label>
-       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="week" ng-change="reloadSlider()">diese Woche |
-	</label>
-    <label>
-       <input type="radio" name="dayWeekAll" ng-model="dayWeekAll" value="all" ng-change="reloadSlider()">alle Werte
-	</label>
-
+<form class="form-group">
+    <label for="selectSensor"> Wähle Messpunkt von {{deviceId}}: </label>
+    <select class="form-control" name="repeatSelect" id="selectSensor" ng-model="selectedKey" ng-change="reload()">
+      <option ng-repeat="key in keys" value="{{key}}" ng-selected="{{key == selectedKey}}">{{key}}</option>
+    </select>
+    <label for="selectZeitraum"> Anzuzeigender Zeitraum: </label>
+    <select class="form-control" name="dayWeekAll" id="selectSensor" ng-model="dayWeekAll" ng-change="reloadSlider()">
+      <option value="day">24 Stunden</option>
+      <option value="week">Eine Woche</option>
+      <option value="all">Alle Daten</option>
+    </select>
     <div range-slider min="sliderMin" max="sliderMax" model-min="min" model-max="max" filter="dateFormat"
 		on-handle-up="reload()"></div>
 	<div ng-show="showChart">
@@ -30,7 +20,12 @@
 			<img ng-src="{{mapLink}}">
 		</center>
 	</div>
-	</div>
+    <div ng-show="showMap || showChart">
+	    <button ng-click="addDisplay(0)" class="btn btn-default">Aufs Display (1)</button>
+        <button ng-click="addDisplay(1)" class="btn btn-default">Aufs Display (2)</button>
+        <button ng-click="addDisplay(2)" class="btn btn-default">Aufs Display (3)</button>
+        <button ng-click="addDisplay(3)" class="btn btn-default">Aufs Display (4)</button>
+    </div>
 	<table class="table table-hover">
 		<thead>
 			<tr>

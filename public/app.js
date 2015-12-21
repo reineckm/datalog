@@ -72,15 +72,14 @@ app.controller('showDebug', function(rest, $scope, $routeParams) {
   });
 });
 
-app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) {
+app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeParams, $q) {
   $scope.deviceId = $routeParams.id;
   $scope.data = [];
   $scope.mapLink = "white.png";
   $scope.showChart = false;
   $scope.showMap = false;
-  $scope.selectedKey = {
-    name : ""
-  };
+  $scope.selectedKey = "";
+  $scope.dayWeekAll = "day"
 
   // Verfügbarer Zeitraum
   var rangeURL = "{deviceid}/range".replace("{deviceid}", $scope.deviceId);
@@ -98,15 +97,17 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
   // Verfügbare Keys
   var keysURL = "{deviceid}/keys".replace("{deviceid}", $scope.deviceId);
   var keyPromise = rest.getURL(keysURL).then(function(promise) {
+    console.log(promise.data);
+    $scope.selectedKey = promise.data[0];
     $scope.keys = promise.data;
   });
 
   // Daten laden
   $scope.reload = function() {
-    if (angular.isString($scope.selectedKey.name) && $scope.selectedKey.name.length > 0) {
+    if (angular.isString($scope.selectedKey) && $scope.selectedKey.length > 0) {
       var dataURL = "{deviceid}/{key}/{from}/{to}";
       dataURL = dataURL.replace("{deviceid}", $scope.deviceId);
-      dataURL = dataURL.replace("{key}", $scope.selectedKey.name);
+      dataURL = dataURL.replace("{key}", $scope.selectedKey);
       dataURL = dataURL.replace("{from}", $scope.min);
       dataURL = dataURL.replace("{to}", $scope.max);
       rest.getURL(dataURL).then(function(promise) {
@@ -119,21 +120,46 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
   // Slider neu laden, wenn zwischen Tag Woche und allen Daten gwechselt wurde
   $scope.reloadSlider = function() {
     if (angular.isString($scope.dayWeekAll) && $scope.dayWeekAll.length > 0) {
+      $scope.$emit('removeInfoBox');
       var hoursAgo24 = new Date() - 24 * 60 * 60 * 1000;
-      var weekAgo = hoursAgo24 * 7;
+      var weekAgo = new Date() - 24 * 60 * 60 * 1000 * 7;
       if ($scope.dayWeekAll == "day") {
         if ($scope.sliderAbsMin <= hoursAgo24 && $scope.sliderMax > hoursAgo24) {
           $scope.sliderMin = hoursAgo24;
           $scope.min = hoursAgo24;
+          $scope.reload();
+        } else {
+          $scope.$emit('infoBox', {
+            text : "Es sind noch nicht genügend Daten für diese Ansicht vorhanden."
+          });
         }
       } else if ($scope.dayWeekAll == "week") {
-        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderMax > hoursAgo24) {
+        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderMax > weekAgo) {
           $scope.sliderMin = weekAgo;
           $scope.min = weekAgo;
+          $scope.reload();
+        } else {
+          $scope.$emit('infoBox', {
+            text : "Es sind noch nicht genügend Daten für diese Ansicht vorhanden."
+          });
         }
       } else if ($scope.dayWeekAll == "all") {
         $scope.min = $scope.sliderMin = $scope.sliderAbsMin;
+        $scope.reload();
       }
+    }
+  };
+
+  $scope.addDisplay = function(zeile) {
+    if (angular.isString($scope.selectedKey) && $scope.selectedKey.length > 0) {
+      var uRL = "display/{line}";
+      uRL = uRL.replace("{line}", zeile);
+      rest.postURL(uRL, {device_id:$scope.deviceId, key:$scope.selectedKey}).then(function(promise) {
+        $scope.$emit('infoBox', {
+          text : "Hinzugefügt: " + promise.data.n,
+          from : $location.absUrl()
+        });
+      });
     }
   };
 
@@ -268,7 +294,7 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $routeParams, $q) 
     if ($scope.data.length == 0) {
       configChartDisplay(false, false);
       return;
-    } else if ($scope.selectedKey.name.substring(0, logMarker.length) === logMarker) {
+    } else if ($scope.selectedKey.substring(0, logMarker.length) === logMarker) {
       createMapChart();
       configChartDisplay(false, true);
       return;
@@ -371,6 +397,11 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
     $scope.infoBoxText = args.text;
     $scope.infoBoxShow = true;
     $scope.infoBoxFrom = args.from;
+  });
+
+  $scope.$on('removeInfoBox', function(event, args) {
+    $scope.infoBoxText = "";
+    $scope.infoBoxShow = false;
   });
 
   var getUpdates = function() {

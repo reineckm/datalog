@@ -103,6 +103,21 @@ exports.valuesPerDevicePerKeyInRange = function(req, res) {
 	});
 };
 
+exports.newestPerDevicePerKey = function(req, res) {
+	var query = {
+			device_id: req.params.device_id,
+			key: req.params.key
+	}
+  db.collection('datapoints', function(err, collection) {
+    collection.find(query).limit(1).sort({timestamp:-1}).toArray(function(err, items) {
+      if (items[0]) {
+        res.send(items[0].value);
+      } else {
+        res.send("");
+      }});
+	});
+};
+
 exports.newestKeysEndingWith = function(req, res) {
   var query = {
     key: {$regex : ".*" + req.params.token},
