@@ -33,7 +33,7 @@ app.filter('minutesAgo', function () {
 
 app.directive('serverStats', function() {
   return {
-    template: 'Uptime: {{serverUptime}} | CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}}'
+    template: 'Uptime: {{serverUptime}} | CPU0: {{serverTemp}} degC | MemAvailable: {{serverMemAvail}} <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" ng-show="longLoadProcess">'
   };
 });
 
@@ -105,6 +105,7 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeP
   // Daten laden
   $scope.reload = function() {
     if (angular.isString($scope.selectedKey) && $scope.selectedKey.length > 0) {
+      $scope.$emit('startLongLoad');
       var dataURL = "{deviceid}/{key}/{from}/{to}";
       dataURL = dataURL.replace("{deviceid}", $scope.deviceId);
       dataURL = dataURL.replace("{key}", $scope.selectedKey);
@@ -156,7 +157,7 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeP
       uRL = uRL.replace("{line}", zeile);
       rest.postURL(uRL, {device_id:$scope.deviceId, key:$scope.selectedKey}).then(function(promise) {
         $scope.$emit('infoBox', {
-          text : "Hinzugefügt: " + promise.data.n,
+          text : "Hinzugefügt als Zeile " + zeile,
           from : $location.absUrl()
         });
       });
@@ -293,10 +294,12 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeP
 
     if ($scope.data.length == 0) {
       configChartDisplay(false, false);
+      $scope.$emit('stopLongLoad');
       return;
     } else if ($scope.selectedKey.substring(0, logMarker.length) === logMarker) {
       createMapChart();
       configChartDisplay(false, true);
+      $scope.$emit('stopLongLoad');
       return;
     } else {
       for (var i = 0; i < $scope.data.length; i++) {
@@ -311,11 +314,14 @@ app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeP
     }
     if (isOnlyZeroOne) {
       padDataAsStateDiagramm();
+      $scope.$emit('stopLongLoad');
     }
     if (isOnlyNumeric) {
       createNumericChart();
       configChartDisplay(true, false);
+      $scope.$emit('stopLongLoad');
     }
+    $scope.$emit('stopLongLoad');
   };
 
   // We load the data only when the whole range and all the
@@ -402,6 +408,14 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
   $scope.$on('removeInfoBox', function(event, args) {
     $scope.infoBoxText = "";
     $scope.infoBoxShow = false;
+  });
+
+  $scope.$on('startLongLoad', function(event, args) {
+    $scope.longLoadProcess = true;
+  });
+
+  $scope.$on('stopLongLoad', function(event, args) {
+    $scope.longLoadProcess = false;
   });
 
   var getUpdates = function() {
