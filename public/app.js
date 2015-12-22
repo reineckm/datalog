@@ -41,351 +41,8 @@ app.directive('widgets', function(rest) {
   return {
     template:
     '<div ng-repeat="a in lastByType">' +
-    '  <b>{{a.value}} {{a.unit}}</b> bei {{a.device_id}} {{a.key}} ({{a.timestamp | minutesAgo}})' +
+    '  <b>{{a.value}} {{a.unit}}</b> bei <a href="#/showDevice/{{a.device_id}}">{{a.device_id}}</a> <a href="#/showDevice/{{a.device_id}}/{{a.key}}">{{a.keyNice}}</a> ({{a.timestamp | minutesAgo}})' +
     '</div>'
-  };
-});
-
-app.controller('showDevices', function(rest, $scope, $routeParams) {
-  var deviceUrl = "deviceids";
-  rest.getURL(deviceUrl).then(function(promise) {
-    $scope.devices = promise.data;
-    for (var i = 0; i < $scope.devices.length; i++) {
-      var keysURL = "{deviceid}/keys".replace("{deviceid}", $scope.devices[i].device_id);
-      rest.getURLWithIndex(keysURL, null, i).then(function(promise) {
-        $scope.devices[promise.config.index].keys = promise.data;
-      });
-    }
-  });
-});
-
-app.controller('showDebug', function(rest, $scope, $routeParams) {
-  var serviceUrl = "debug";
-  rest.getURL(serviceUrl).then(function(promise) {
-    if (promise.data.length > 0) {
-      $scope.header = Object.keys(promise.data[0]);
-      $scope.rows = {
-        rows : promise.data,
-        cols : Object.keys(promise.data[0])
-      };
-    }
-  });
-});
-
-app.controller('showDevice', function(rest, dateUtil, $scope, $location, $routeParams, $q) {
-  $scope.deviceId = $routeParams.id;
-  $scope.data = [];
-  $scope.mapLink = "white.png";
-  $scope.showChart = false;
-  $scope.showMap = false;
-  $scope.selectedKey = "";
-  $scope.dayWeekAll = "day"
-
-  // Verfügbarer Zeitraum
-  var rangeURL = "{deviceid}/range".replace("{deviceid}", $scope.deviceId);
-  var rangePromise = rest.getURL(rangeURL).then(function(promise) {
-    var min = parseInt(promise.data.MIN_TS);
-    var max = parseInt(promise.data.MAX_TS);
-    $scope.min = $scope.sliderMin = $scope.sliderAbsMin = min;
-    $scope.max = $scope.sliderMax = max;
-    var hoursAgo24 = max - 24 * 60 * 60 * 1000;
-    if (min < hoursAgo24) {
-      $scope.min = hoursAgo24;
-    }
-  });
-
-  // Verfügbare Keys
-  var keysURL = "{deviceid}/keys".replace("{deviceid}", $scope.deviceId);
-  var keyPromise = rest.getURL(keysURL).then(function(promise) {
-    console.log(promise.data);
-    $scope.selectedKey = promise.data[0];
-    $scope.keys = promise.data;
-  });
-
-  // Daten laden
-  $scope.reload = function() {
-    if (angular.isString($scope.selectedKey) && $scope.selectedKey.length > 0) {
-      $scope.$emit('startLongLoad');
-      var dataURL = "{deviceid}/{key}/{from}/{to}";
-      dataURL = dataURL.replace("{deviceid}", $scope.deviceId);
-      dataURL = dataURL.replace("{key}", $scope.selectedKey);
-      dataURL = dataURL.replace("{from}", $scope.min);
-      dataURL = dataURL.replace("{to}", $scope.max);
-      rest.getURL(dataURL).then(function(promise) {
-        $scope.data = promise.data;
-        chooseChart();
-      });
-    }
-  };
-
-  // Slider neu laden, wenn zwischen Tag Woche und allen Daten gwechselt wurde
-  $scope.reloadSlider = function() {
-    if (angular.isString($scope.dayWeekAll) && $scope.dayWeekAll.length > 0) {
-      $scope.$emit('removeInfoBox');
-      var hoursAgo24 = new Date() - 24 * 60 * 60 * 1000;
-      var weekAgo = new Date() - 24 * 60 * 60 * 1000 * 7;
-      if ($scope.dayWeekAll == "day") {
-        if ($scope.sliderAbsMin <= hoursAgo24 && $scope.sliderMax > hoursAgo24) {
-          $scope.sliderMin = hoursAgo24;
-          $scope.min = hoursAgo24;
-          $scope.reload();
-        } else {
-          $scope.$emit('infoBox', {
-            text : "Es sind noch nicht genügend Daten für diese Ansicht vorhanden."
-          });
-        }
-      } else if ($scope.dayWeekAll == "week") {
-        if ($scope.sliderAbsMin <= weekAgo && $scope.sliderMax > weekAgo) {
-          $scope.sliderMin = weekAgo;
-          $scope.min = weekAgo;
-          $scope.reload();
-        } else {
-          $scope.$emit('infoBox', {
-            text : "Es sind noch nicht genügend Daten für diese Ansicht vorhanden."
-          });
-        }
-      } else if ($scope.dayWeekAll == "all") {
-        $scope.min = $scope.sliderMin = $scope.sliderAbsMin;
-        $scope.reload();
-      }
-    }
-  };
-
-  $scope.addDisplay = function(zeile) {
-    if (angular.isString($scope.selectedKey) && $scope.selectedKey.length > 0) {
-      var uRL = "display/{line}";
-      uRL = uRL.replace("{line}", zeile);
-      rest.postURL(uRL, {device_id:$scope.deviceId, key:$scope.selectedKey}).then(function(promise) {
-        $scope.$emit('infoBox', {
-          text : "Hinzugefügt als Zeile " + zeile,
-          from : $location.absUrl()
-        });
-      });
-    }
-  };
-
-  // Here data which seems like it only has binary states (0,
-  // 1) gets
-  // padded so that it looks like "switch on - switch off" by
-  // adding a
-  // 0 a minimum amount of time befor 0 -> 1 transition an
-  // 1 a minimum amount of time befor 1 -> 0 transition
-  var padDataAsStateDiagramm = function() {
-    var lastV = 2;
-    var lastTS = 0;
-    for (var i = 0; i < $scope.data.length; i++) {
-      var v = parseInt($scope.data[i].value);
-      var ts = $scope.data[i].timestamp;
-      if (lastV === 1 && v === 0 && (ts - 1 > lastTS)) {
-        $scope.data.splice(i, 0, {
-          "value" : 1,
-          "timestamp" : (ts - 1)
-        });
-      }
-      if (lastV === 0 && v === 1 && (ts - 1 > lastTS)) {
-        $scope.data.splice(i, 0, {
-          "value" : 0,
-          "timestamp" : (ts - 1)
-        });
-      }
-      lastV = v;
-      lastTS = ts;
-    }
-  };
-
-  // This creates a linechart based on the data in $scope.data
-  var createNumericChart = function() {
-    $scope.gcRows = [];
-    for (var i = 0; i < $scope.data.length; i++) {
-      $scope.gcRows.push({
-        "c" : [ {
-          "v" : new Date($scope.data[i].timestamp),
-          "f" : dateUtil.germanDateTime(new Date($scope.data[i].timestamp))
-        }, {
-          "v" : $scope.data[i].value,
-          "f" : $scope.data[i].value
-        } ],
-      });
-    }
-
-    $scope.chartObject = {
-      "type" : "LineChart",
-      "displayed" : $scope.lineChartVisible,
-      "data" : {
-        "cols" : [ {
-          "id" : "Uhrzeit",
-          "label" : "Uhrzeit",
-          "type" : "date",
-          "p" : {}
-        }, {
-          "id" : "Wert",
-          "label" : "Wert",
-          "type" : "number",
-          "p" : {}
-        } ],
-        "rows" : $scope.gcRows
-      },
-      "options" : {
-        "fill" : 20,
-        "displayExactValues" : true,
-        "vAxis" : {
-          "title" : "Wert",
-          "gridlines" : {
-            "count" : 10
-          }
-        },
-        "hAxis" : {
-          "title" : "Zeit"
-        }
-      },
-      "formatters" : {}
-    };
-  };
-
-  // This creates a map using the google map static chart api
-  var createMapChart = function() {
-    var points = [];
-    for (var i = 0; i < $scope.data.length; i++) {
-      points.push({
-        "Lon" : parseFloat($scope.data[i].value.split(";")[1]),
-        "Lat" : parseFloat($scope.data[i].value.split(";")[0])
-      });
-    }
-    $scope.mapLink = gmaps(points, 400, 200);
-  };
-
-  // creates google staticmap api link.
-  // points: array of objects with Lon and Lat variables
-  // w, h: map size in px
-  // @see
-  // https://developers.google.com/maps/documentation/staticmaps/?hl=de
-  var gmaps = function(points, w, h) {
-    var marker = [];
-    marker.push("{lat},{lon}".replace("{lon}", points[0].Lon).replace("{lat}", points[0].Lat));
-    if (points.length > 2) {
-      var step = parseInt(points.length / 10) + 1;
-      for (var i = 0; i < points.length; i += step) {
-        marker.push("{lat},{lon}".replace("{lon}", points[i].Lon).replace("{lat}",
-                                                                          points[i].Lat));
-      }
-    }
-    if (points.length > 1) {
-      marker.push("{lat},{lon}".replace("{lon}", points[points.length - 1].Lon).replace("{lat}",
-                                                                                        points[points.length - 1].Lat));
-    }
-
-    return "http://maps.googleapis.com/maps/api/staticmap?&markers=color:blue%7Clabel:P%7C{marker}&size={w}x{h}&sensor=false"
-    .replace("{marker}", marker.join("%7C")).replace("{h}", h).replace("{w}", w);
-  };
-
-  var configChartDisplay = function(chartVisible, mapVisible) {
-    $scope.showChart = chartVisible;
-    $scope.showMap = mapVisible;
-    if (!mapVisible) {
-      $scope.mapLink = "white.png";
-    }
-  };
-
-  // Logic that determites wich chart to use
-  var chooseChart = function() {
-    var logMarker = "posLatLon";
-    var isOnlyNumeric = true;
-    var isOnlyZeroOne = true;
-
-    if ($scope.data.length == 0) {
-      configChartDisplay(false, false);
-      $scope.$emit('stopLongLoad');
-      return;
-    } else if ($scope.selectedKey.substring(0, logMarker.length) === logMarker) {
-      createMapChart();
-      configChartDisplay(false, true);
-      $scope.$emit('stopLongLoad');
-      return;
-    } else {
-      for (var i = 0; i < $scope.data.length; i++) {
-        var v = $scope.data[i].value;
-        if (!(!isNaN(parseFloat(v) && isFinite(v)))) {
-          isOnlyNumeric = false;
-        }
-        if (v != 1 && v != 0) {
-          isOnlyZeroOne = false;
-        }
-      }
-    }
-    if (isOnlyZeroOne) {
-      padDataAsStateDiagramm();
-      $scope.$emit('stopLongLoad');
-    }
-    if (isOnlyNumeric) {
-      createNumericChart();
-      configChartDisplay(true, false);
-      $scope.$emit('stopLongLoad');
-    }
-    $scope.$emit('stopLongLoad');
-  };
-
-  // We load the data only when the whole range and all the
-  // keys are known
-  $q.all([ rangePromise, keyPromise ]).then(function(result) {
-    $scope.reload();
-  }, function() {
-    alert("Schlüssel oder Zeitraum kann nicht geladen werden.");
-  });
-});
-
-app.controller('showManualInput', function(rest, $scope, $routeParams) {
-  $scope.send = function() {
-    var data = {
-      "key":$scope.key,
-      "value":$scope.value,
-      "timestamp":Date.now()
-    };
-    var serviceUrl = $scope.deviceId;
-    $scope.devices = rest.postURL(serviceUrl, data).then(function(promise) {
-      $scope.$emit('infoBox', {
-        text : "Datensatz " + promise.data + "eingefügt."
-      });
-    });
-  };
-});
-
-app.controller('showDelete', function(rest, $scope, $routeParams, $location) {
-  $scope.id = $routeParams.id;
-  $scope.device_id = $routeParams.device_id;
-  var serviceUrl = $routeParams.device_id + "/" + $routeParams.id;
-  $scope.doDelete = function() {
-    rest.deleteURL(serviceUrl).then(function(promise) {
-      $location.path($scope.lastPath);
-      $scope.$emit('infoBox', {
-        text : "Gelöschte Einträge: " + promise.data.n,
-        from : $location.absUrl()
-      });
-    });
-  };
-});
-
-app.controller('showDeleteDevice', function(rest, $scope, $routeParams, $location) {
-  $scope.device_id = $routeParams.device_id;
-  var serviceUrl = $routeParams.device_id;
-  $scope.doDelete = function() {
-    rest.deleteURL(serviceUrl).then(function(promise) {
-      $location.path($scope.lastPath);
-      $scope.$emit('infoBox', {
-        text : "Gelöschte Einträge: " + promise.data.n,
-        from : $location.absUrl()
-      });
-    });
-  };
-});
-
-app.controller('showAddDatatype', function(rest, $scope, $routeParams) {
-  $scope.send = function(datatype) {
-    $scope.devices = rest.postURL("datatypes", datatype).then(function(promise) {
-      console.log(promise.data);
-      $scope.$emit('infoBox', {
-        text : "Datensatz " + promise.data + "eingefügt."
-      });
-    });
   };
 });
 
@@ -453,7 +110,8 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
             aDataPoint.value = dataPromise.data[i].value;
             aDataPoint.unit =  dataPromise.config.index.unit;
             aDataPoint.device_id = dataPromise.data[i]._id.device_id;
-            aDataPoint.key = dataPromise.data[i]._id.key.substring(0,dataPromise.data[i]._id.key.length - dataPromise.config.index.sufix.length - 1);
+            aDataPoint.keyNice = dataPromise.data[i]._id.key.substring(0,dataPromise.data[i]._id.key.length - dataPromise.config.index.sufix.length - 1);
+            aDataPoint.key = dataPromise.data[i]._id.key;
             aDataPoint.timestamp = dataPromise.data[i].lastDate;
             var found = false;
             for (var f = 0; f < $scope.lastByType.length; f++) {
@@ -476,28 +134,33 @@ app.controller('MainCtrl', function(rest, $scope, $timeout, $interval, $route, $
 
 app.config(function($routeProvider, $locationProvider) {
   $routeProvider.when('/showDevices', {
-    templateUrl : 'showDevices.html',
-    controller : 'showDevices'
-  }).when('/showUpdates', {
-    templateUrl : 'showUpdates.html',
+    templateUrl : 'view/devicesView.html',
+    controller : 'devicesCtrl'
   }).when('/showDevice/:id', {
-    templateUrl : 'showDevice.html',
-    controller : 'showDevice'
+    templateUrl : 'view/deviceView.html',
+    controller : 'deviceCtrl'
+  }).when('/showDevice/:id/:key', {
+    templateUrl : 'view/deviceView.html',
+    controller : 'deviceCtrl'
   }).when('/showDebug', {
-    templateUrl : 'showDebug.html',
-    controller : 'showDebug'
+    templateUrl : 'view/debugView.html',
+    controller : 'debugCtrl'
   }).when('/showManualInput', {
-    templateUrl : 'showManualInput.html',
-    controller : 'showManualInput'
+    templateUrl : 'view/manualInputView.html',
+    controller : 'manualInputCtrl'
   }).when('/showDelete/:device_id/:id', {
-    templateUrl : 'showDelete.html',
-    controller : 'showDelete'
+    templateUrl : 'view/deleteView.html',
+    controller : 'deleteCtrl'
   }).when('/showDeleteDevice/:device_id', {
-    templateUrl : 'showDeleteDevice.html',
-    controller : 'showDeleteDevice'
+    templateUrl : 'view/deleteDeviceView.html',
+    controller : 'deleteDeviceCtrl'
   }).when('/showAddDatatype', {
-    templateUrl : 'showAddDatatype.html',
-    controller : 'showAddDatatype'
+    templateUrl : 'view/addDatatypeView.html',
+    controller : 'addDatatypeCtrl'
+  }).when('/showUpdates', {
+    templateUrl : 'view/updatesView.html'
+  }).when('/', {
+    templateUrl : 'view/helloView.html'
   }).otherwise({
     redirectTo : "/"
   });

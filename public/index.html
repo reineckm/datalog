@@ -9,13 +9,20 @@
         <link rel="stylesheet" href="css/effects.css">
         <link rel="stylesheet" href="css/customStyle.css">
         <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
         <script src="bower_components/angular/angular.js"></script>
-        <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
         <script src="bower_components/angular-rangeslider/angular.rangeSlider.js"></script>
         <script src="bower_components/angular-route/angular-route.js"></script>
         <script src="bower_components/angular-google-chart/ng-google-chart.js"></script>
         <script src="datalogLibrary.js"></script>
         <script src="app.js"></script>
+        <script src="ctrl/devicesCtrl.js"></script>
+        <script src="ctrl/deviceCtrl.js"></script>
+        <script src="ctrl/debugCtrl.js"></script>
+        <script src="ctrl/manualInputCtrl.js"></script>
+        <script src="ctrl/deleteCtrl.js"></script>
+        <script src="ctrl/deleteDeviceCtrl.js"></script>
+        <script src="ctrl/addDatatypeCtrl.js"></script>
     </head>
     <body ng-controller="MainCtrl">
         <nav class="navbar navbar-default">
@@ -23,10 +30,10 @@
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                             data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span
-                                                                                                                                           class="icon-bar"></span>
+                        <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#"> <img alt="Datalog" src="logo-small.png">
+                    <a class="navbar-brand" href="#/"> <img alt="Datalog" src="logo-small.png">
                     </a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -51,20 +58,22 @@
                 </div>
             </div>
         </nav>
-        <main class="container-fluid">
+        <div class="container-fluid">
             <div class="row">
-                <div class="col-xs-12 col-md-12">
+                <div class="col-xs-12 col-md-12>
                     <div class="alert alert-info" role="alert" ng-show="infoBoxShow">
                         <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> <span class="sr-only">Info:</span>
                         {{infoBoxText}}
                     </div>
                 </div>
-                <div widgets class="col-xs-12 col-md-4"></div>
-                <div class="col-xs-12 col-md-8">
-                    <div ng-view></div>
+
+                <div class="col-xs-12 col-md-4 {{updateTableCSS}}"" style="background-color: #31b0d5;">
+                    <h2>Werte definierter <a href="#/showAddDatatype">Datentypen</a></h2>
+                    <div widgets></div>
                 </div>
+                <div ng-view class="col-xs-12 col-md-8"></div>
             </div>
-        </main>
+        </div>
         <div class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
                 <div server-stats class="navbar-text pull-left"></div>

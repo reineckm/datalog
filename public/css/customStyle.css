@@ -1,1 +1,12 @@
-
+label { font-size: 15px !important;}
+.navbar { font-size: 15px !important;}
+table { font-size: 15px !important;}
+h1, .h1,
+h2, .h2,
+h3, .h3 {
+  margin-top: 0;
+}
+#chart_div svg>rect {
+    fill: #4E5D6C !important;
+    fill-opacity:1 !important;
+}

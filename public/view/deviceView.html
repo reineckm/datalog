@@ -1,0 +1,55 @@
+<meta charset="utf-8">
+<h2>Gerät: {{deviceId}}</h2>
+<form class="form" role="form">
+    <label for="selectSensor" class="control-label col-xs-4">Wähle Messpunkt von {{deviceId}}:</label>
+    <div class="col-xs-8">
+        <select class="form-control" name="repeatSelect" id="selectSensor" ng-model="selectedKey" ng-change="keySelected()">
+          <option ng-repeat="key in keys" value="{{key}}" ng-selected="{{key == selectedKey}}">{{key}}</option>
+        </select>
+    </div>
+    <label for="selectZeitraum" class="control-label col-xs-4">Anzuzeigender Zeitraum:</label>
+    <div class="col-xs-8">
+        <select class="form-control" name="dayWeekAll" id="selectSensor" ng-model="dayWeekAll" ng-change="reloadSlider()">
+          <option value="day">24 Stunden</option>
+          <option value="week">Eine Woche</option>
+          <option value="all">Alle Daten</option>
+        </select>
+    </div>
+    <label for="selectZeitraum" class="control-label col-xs-4">Zum Display hinzufügen:</label>
+    <div class="col-xs-8">
+        <select class="form-control" name="addToDisplay" id="addToDisplay" ng-model="addToDisplayLine" ng-change="addDisplay()">
+            <option value="0">Zeile 1</option>
+            <option value="1">Zeile 2</option>
+            <option value="2">Zeile 3</option>
+            <option value="3">Zeile 4</option>
+        </select>
+    </div>
+    <div class="col-xs-12">
+        <br/>
+        <div ng-show="showChart">
+	    	<div google-chart id="chart_div" chart="chartObject" style=""></div>
+	    </div>
+
+        <div ng-show="showMap">
+            <center>
+                <img ng-src="{{mapLink}}">
+            </center>
+        </div>
+        <div range-slider min="sliderMin" max="sliderMax" model-min="min" model-max="max" filter="dateFormat"on-handle-up="reload()">
+        </div>
+	</div>
+</form>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Zeitpunkt</th>
+            <th>Wert</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="set in data|orderBy:TIMESTAMP:ASC">
+            <td>{{set.timestamp | date:'dd.MM.yy HH:mm'}}</td>
+            <td>{{set.value}}</td>
+        </tr>
+    </tbody>
+</table>

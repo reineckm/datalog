@@ -1,0 +1,9 @@
+<meta charset="utf-8">
+<table class="table table-bordered table-hover table-condensed">
+    <h2>Geräte:</h2>
+    <div ng-repeat="device in devices">
+        <a class="btn glyphicon glyphicon-eye-open" ng-href="#/showDevice/{{device.device_id}}"></a>
+        <a class="btn glyphicon glyphicon-trash" ng-href="#/showDeleteDevice/{{device.device_id}}"></a>
+        {{device.device_id}}, {{device.keys.join(", ")}}
+    </div>
+</table>

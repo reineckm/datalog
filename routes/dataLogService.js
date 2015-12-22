@@ -79,10 +79,9 @@ exports.range = function(req, res) {
       {$match: {
         device_id: forId
       }},
-			{ $group: { '_id':forId , 'MIN_TS': {'$min': "$timestamp" }, 'MAX_TS': {'$max': "$timestamp" } } }
+      { $group: {_id:"$key" , 'MIN_TS': {'$min': "$timestamp" }, 'MAX_TS': {'$max': "$timestamp" } } }
 		]).toArray(function(err, items) {
-      console.log(items);
-			res.send(items[0]);
+			res.send(items);
 		})
 	});
 };
