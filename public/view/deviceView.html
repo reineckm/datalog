@@ -1,33 +1,34 @@
 <meta charset="utf-8">
-<h2>Gerät: {{deviceId}}</h2>
+<h3>{{deviceId}}</h3>
 <form class="form" role="form">
-    <label for="selectSensor" class="control-label col-xs-4">Wähle Messpunkt von {{deviceId}}:</label>
-    <div class="col-xs-8">
+    <label for="selectSensor" class="control-label "> Wähle Messpunkt von {{deviceId}}: </label>
+    <div class="">
         <select class="form-control" name="repeatSelect" id="selectSensor" ng-model="selectedKey" ng-change="keySelected()">
           <option ng-repeat="key in keys" value="{{key}}" ng-selected="{{key == selectedKey}}">{{key}}</option>
         </select>
     </div>
-    <label for="selectZeitraum" class="control-label col-xs-4">Anzuzeigender Zeitraum:</label>
-    <div class="col-xs-8">
+    <label for="selectZeitraum" class="control-label "> Anzuzeigender Zeitraum: </label>
+    <div class="">
         <select class="form-control" name="dayWeekAll" id="selectSensor" ng-model="dayWeekAll" ng-change="reloadSlider()">
           <option value="day">24 Stunden</option>
           <option value="week">Eine Woche</option>
           <option value="all">Alle Daten</option>
         </select>
     </div>
-    <label for="selectZeitraum" class="control-label col-xs-4">Zum Display hinzufügen:</label>
-    <div class="col-xs-8">
-        <select class="form-control" name="addToDisplay" id="addToDisplay" ng-model="addToDisplayLine" ng-change="addDisplay()">
-            <option value="0">Zeile 1</option>
-            <option value="1">Zeile 2</option>
-            <option value="2">Zeile 3</option>
-            <option value="3">Zeile 4</option>
-        </select>
+    <div ng-show="showMap || showChart">
+        <label for="selectZeitraum" class="control-label "> Zum Display hinzufügen: </label>
+        <div class="">
+            <select class="form-control" name="addToDisplay" id="addToDisplay" ng-model="addToDisplayLine" ng-change="addDisplay()">
+                <option value="0">Zeile 1</option>
+                <option value="1">Zeile 2</option>
+                <option value="2">Zeile 3</option>
+                <option value="3">Zeile 4</option>
+            </select>
+        </div>
     </div>
-    <div class="col-xs-12">
         <br/>
         <div ng-show="showChart">
-	    	<div google-chart id="chart_div" chart="chartObject" style=""></div>
+	    	<div google-chart chart="chartObject" style=""></div>
 	    </div>
 
         <div ng-show="showMap">

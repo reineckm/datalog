@@ -58,22 +58,18 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-xs-12 col-md-12>
-                    <div class="alert alert-info" role="alert" ng-show="infoBoxShow">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> <span class="sr-only">Info:</span>
+        <main class="container-fluid">
+                <div class="alert alert-info col-xs-12 col-md-12" role="alert" ng-show="infoBoxShow">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Info:</span>
                         {{infoBoxText}}
-                    </div>
                 </div>
-
-                <div class="col-xs-12 col-md-4 {{updateTableCSS}}"" style="background-color: #31b0d5;">
-                    <h2>Werte definierter <a href="#/showAddDatatype">Datentypen</a></h2>
-                    <div widgets></div>
-                </div>
-                <div ng-view class="col-xs-12 col-md-8"></div>
+            <div class="col-xs-12 col-md-4 {{updateTableCSS}}"" style="background-color: #31b0d5;">
+                <h3>Werte definierter <a href="#/showAddDatatype">Datentypen</a></h3>
+                <div widgets></div>
             </div>
-        </div>
+            <div ng-view class="col-xs-12 col-md-8"></div>
+        </main>
         <div class="navbar navbar-default navbar-fixed-bottom">
             <div class="container">
                 <div server-stats class="navbar-text pull-left"></div>
