@@ -97,6 +97,9 @@ exports.valuesPerDevicePerKeyInRange = function(req, res) {
 	}
 	db.collection('datapoints', function(err, collection) {
 		collection.find(query).toArray(function(err, items) {
+			items = items.sort(function(a, b) {
+   				 return parseInt(a.timestamp) - parseInt(b.timestamp);
+			});
 			res.send(items);
 		})
 	});
